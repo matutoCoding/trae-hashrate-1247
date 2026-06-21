@@ -1,0 +1,360 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 160rpx;
+}
+
+.content {
+  padding: $spacing-lg;
+}
+
+.fileInfoCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.fileHeader {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.fileIcon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  background: linear-gradient(135deg, rgba(30, 90, 232, 0.1) 0%, rgba(30, 90, 232, 0.2) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+
+  .iconText {
+    font-size: 36rpx;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+  }
+}
+
+.fileTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  @include text-ellipsis-multi(2);
+}
+
+.fileMeta {
+  display: flex;
+  align-items: center;
+  margin-top: $spacing-sm;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+
+  .dot {
+    margin: 0 $spacing-xs;
+    color: $color-border;
+  }
+}
+
+.section {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+
+  .titleIcon {
+    margin-right: $spacing-sm;
+    font-size: $font-size-lg;
+  }
+}
+
+.summaryCard {
+  background-color: rgba(255, 154, 0, 0.06);
+  border: 1rpx solid rgba(255, 154, 0, 0.2);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.summaryIcon {
+  margin-right: $spacing-sm;
+  font-size: $font-size-md;
+}
+
+.summaryLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-warning;
+}
+
+.summaryText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.directoryTree {
+  padding-left: $spacing-sm;
+}
+
+.treeNode {
+  margin-bottom: $spacing-xs;
+}
+
+.nodeContent {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0;
+
+  .nodeIcon {
+    margin-right: $spacing-sm;
+    font-size: $font-size-md;
+    flex-shrink: 0;
+  }
+
+  .nodeName {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    @include text-ellipsis;
+  }
+}
+
+.treeChildren {
+  padding-left: $spacing-lg;
+}
+
+.screenshotSection {
+  .screenshotsScroll {
+    margin: 0 -$spacing-lg;
+    padding: 0 $spacing-lg;
+  }
+
+  .screenshotList {
+    display: flex;
+    gap: $spacing-md;
+    @include scroll-x-container;
+  }
+
+  .screenshotItem {
+    @include scroll-x-item(240rpx);
+    flex-shrink: 0;
+    width: 240rpx;
+    height: 320rpx;
+    border-radius: $radius-md;
+    overflow: hidden;
+    background-color: $color-bg-gray;
+
+    .screenshotImg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.applicantCard {
+  display: flex;
+  align-items: center;
+}
+
+.applicantAvatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.applicantInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.applicantName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.applicantDept {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.infoList {
+  .infoRow {
+    display: flex;
+    align-items: flex-start;
+    padding: $spacing-sm 0;
+
+    & + & {
+      border-top: 1rpx solid $color-divider;
+    }
+  }
+
+  .infoLabel {
+    width: 140rpx;
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+    flex-shrink: 0;
+  }
+
+  .infoValue {
+    flex: 1;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: $line-height-normal;
+  }
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $color-bg-card;
+  padding: $spacing-md $spacing-lg;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.rejectBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  background-color: rgba(245, 63, 63, 0.1);
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-error;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.approveBtn {
+  @include button-reset;
+  flex: 2;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  background: $gradient-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.decisionResult {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+
+  .resultHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    .resultIcon {
+      width: 64rpx;
+      height: 64rpx;
+      border-radius: $radius-round;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: $spacing-md;
+      font-size: 32rpx;
+
+      &.approved {
+        background-color: rgba(0, 180, 42, 0.1);
+      }
+
+      &.rejected {
+        background-color: rgba(245, 63, 63, 0.1);
+      }
+
+      &.time-limited {
+        background-color: rgba(255, 125, 0, 0.1);
+      }
+
+      &.online-only {
+        background-color: rgba(30, 90, 232, 0.1);
+      }
+    }
+
+    .resultInfo {
+      flex: 1;
+
+      .resultStatus {
+        font-size: $font-size-md;
+        font-weight: $font-weight-semibold;
+        color: $color-text-primary;
+      }
+
+      .resultTime {
+        font-size: $font-size-sm;
+        color: $color-text-tertiary;
+        margin-top: 4rpx;
+      }
+    }
+  }
+
+  .resultReason {
+    background-color: $color-bg-gray;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+
+    .reasonLabel {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+      margin-bottom: 8rpx;
+    }
+
+    .reasonText {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      line-height: $line-height-normal;
+    }
+  }
+}

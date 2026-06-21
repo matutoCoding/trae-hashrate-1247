@@ -1,0 +1,52 @@
+@use '@/styles/variables.scss' as *;
+
+.levelTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-xs;
+  white-space: nowrap;
+
+  &.small {
+    padding: 2rpx 12rpx;
+    height: 36rpx;
+    min-width: 56rpx;
+
+    .tagText {
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  &.medium {
+    padding: 4rpx 16rpx;
+    height: 44rpx;
+    min-width: 72rpx;
+
+    .tagText {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  &.top-secret {
+    background-color: rgba(201, 42, 42, 0.12);
+    .tagText {
+      color: $color-level-top-secret;
+    }
+  }
+
+  &.confidential {
+    background-color: rgba(247, 114, 52, 0.12);
+    .tagText {
+      color: $color-level-confidential;
+    }
+  }
+
+  &.secret {
+    background-color: rgba(255, 154, 0, 0.12);
+    .tagText {
+      color: $color-level-secret;
+    }
+  }
+}

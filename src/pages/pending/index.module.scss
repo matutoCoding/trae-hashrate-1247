@@ -1,0 +1,159 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+}
+
+.header {
+  background: $gradient-primary;
+  padding: $spacing-lg $spacing-lg $spacing-xl;
+  color: $color-text-white;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  font-size: $font-size-md;
+  opacity: 0.9;
+}
+
+.countBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-round;
+  padding: 4rpx 20rpx;
+  margin-left: $spacing-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.filterSection {
+  margin-top: -$spacing-xl;
+  padding: 0 $spacing-lg;
+}
+
+.filterCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  box-shadow: $shadow-float;
+  margin-bottom: $spacing-md;
+}
+
+.filterTitle {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+}
+
+.filterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.filterTag {
+  padding: 8rpx 24rpx;
+  border-radius: $radius-button;
+  background-color: $color-bg-gray;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  transition: all $transition-fast;
+
+  &.active {
+    background-color: rgba(30, 90, 232, 0.1);
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.listSection {
+  padding: 0 $spacing-lg $spacing-xl;
+  padding-bottom: 120rpx;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.listTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.listCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 0;
+}
+
+.emptyIcon {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-round;
+  background-color: $color-bg-gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-md;
+
+  .iconText {
+    font-size: 80rpx;
+  }
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.quickActions {
+  position: fixed;
+  bottom: 180rpx;
+  right: $spacing-lg;
+  z-index: 100;
+}
+
+.quickBtn {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $radius-round;
+  background: $gradient-primary;
+  box-shadow: 0 8rpx 24rpx rgba(30, 90, 232, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.quickBtnText {
+  color: $color-text-white;
+  font-size: 40rpx;
+  font-weight: $font-weight-bold;
+}

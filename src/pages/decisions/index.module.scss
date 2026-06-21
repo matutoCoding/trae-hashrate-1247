@@ -1,0 +1,182 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+}
+
+.header {
+  background: $gradient-primary;
+  padding: $spacing-lg $spacing-lg $spacing-xl;
+  color: $color-text-white;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-lg;
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.statItem {
+  flex: 1;
+  text-align: center;
+
+  & + & {
+    border-left: 1rpx solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+.statNumber {
+  display: block;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+}
+
+.filterSection {
+  margin-top: -$spacing-lg;
+  padding: 0 $spacing-lg;
+}
+
+.filterCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  box-shadow: $shadow-float;
+  margin-bottom: $spacing-md;
+}
+
+.filterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.filterTag {
+  padding: 8rpx 28rpx;
+  border-radius: $radius-button;
+  background-color: $color-bg-gray;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  transition: all $transition-fast;
+
+  &.active {
+    background-color: rgba(30, 90, 232, 0.1);
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.listSection {
+  padding: 0 $spacing-lg $spacing-xl;
+  padding-bottom: 120rpx;
+}
+
+.projectGroup {
+  margin-bottom: $spacing-lg;
+}
+
+.projectHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+  cursor: pointer;
+}
+
+.projectTitle {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.projectIcon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-md;
+  background: $gradient-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+
+  .iconText {
+    color: $color-text-white;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+  }
+}
+
+.projectName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.projectCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.arrowIcon {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  transition: transform $transition-base;
+  margin-left: $spacing-sm;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+.projectContent {
+  overflow: hidden;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 0;
+}
+
+.emptyIcon {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-round;
+  background-color: $color-bg-gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-md;
+
+  .iconText {
+    font-size: 80rpx;
+  }
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
