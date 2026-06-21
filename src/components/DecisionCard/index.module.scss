@@ -27,6 +27,11 @@
   gap: $spacing-sm;
 }
 
+.expiredCard {
+  opacity: 0.75;
+  background-color: rgba(134, 144, 156, 0.05);
+}
+
 .statusTag {
   padding: 4rpx 16rpx;
   border-radius: $radius-xs;
@@ -53,6 +58,24 @@
     background-color: rgba(30, 90, 232, 0.1);
     color: $color-primary;
   }
+
+  &.expired {
+    background-color: rgba(134, 144, 156, 0.15);
+    color: $color-text-tertiary;
+  }
+
+  &.transferred {
+    background-color: rgba(156, 39, 176, 0.1);
+    color: #9C27B0;
+  }
+}
+
+.notifiedTag {
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+  font-size: $font-size-xs;
+  background-color: rgba(30, 90, 232, 0.08);
+  color: $color-primary;
 }
 
 .decisionTime {
@@ -90,6 +113,60 @@
   font-size: $font-size-sm;
   color: $color-text-secondary;
   @include text-ellipsis;
+}
+
+.deadlineBox {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background-color: rgba(255, 125, 0, 0.06);
+  border-radius: $radius-md;
+}
+
+.deadlineLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.deadlineValue {
+  font-size: $font-size-sm;
+  color: $color-warning;
+  font-weight: $font-weight-medium;
+
+  &.expiredText {
+    color: $color-text-tertiary;
+  }
+}
+
+.daysRemaining {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-left: $spacing-xs;
+}
+
+.transferBox {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background-color: rgba(156, 39, 176, 0.06);
+  border-radius: $radius-md;
+}
+
+.transferLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.transferText {
+  font-size: $font-size-sm;
+  color: #9C27B0;
+  font-weight: $font-weight-medium;
 }
 
 .reasonBox {

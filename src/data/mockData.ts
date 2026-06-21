@@ -1,4 +1,4 @@
-import { ApprovalItem, DirectoryNode } from '@/types/approval';
+import { ApprovalItem, DirectoryNode, ApproverInfo, NotificationItem } from '@/types/approval';
 
 const directoryData: DirectoryNode[] = [
   {
@@ -332,3 +332,104 @@ export const currentUser = {
   phone: '138****8888',
   email: 'wangzong@company.com'
 };
+
+export const approverList: ApproverInfo[] = [
+  {
+    id: 'ADMIN001',
+    name: '王总',
+    title: '副总裁',
+    department: '管理层',
+    avatar: 'https://picsum.photos/id/64/100/100',
+    phone: '138****8888'
+  },
+  {
+    id: 'ADMIN002',
+    name: '李总',
+    title: '首席财务官',
+    department: '财务部',
+    avatar: 'https://picsum.photos/id/91/100/100',
+    phone: '139****6666'
+  },
+  {
+    id: 'ADMIN003',
+    name: '张总',
+    title: '首席技术官',
+    department: '技术部',
+    avatar: 'https://picsum.photos/id/177/100/100',
+    phone: '137****9999'
+  },
+  {
+    id: 'ADMIN004',
+    name: '刘总',
+    title: '首席运营官',
+    department: '运营部',
+    avatar: 'https://picsum.photos/id/338/100/100',
+    phone: '136****7777'
+  },
+  {
+    id: 'ADMIN005',
+    name: '陈总',
+    title: '法务总监',
+    department: '法务部',
+    avatar: 'https://picsum.photos/id/1027/100/100',
+    phone: '135****5555'
+  }
+];
+
+export const myProjects = ['PRJ001', 'PRJ004', 'PRJ006'];
+
+export const notificationList: NotificationItem[] = [
+  {
+    id: 'NOT001',
+    type: 'approval-result',
+    title: '审批结果通知',
+    fileName: '年度预算调整方案.pdf',
+    fileId: 'FILE006',
+    approvalId: 'AP006',
+    decision: 'approve',
+    decisionReason: '预算调整合理，同意执行',
+    decisionTime: '2026-06-15 15:30',
+    fromUser: '王总',
+    toUserId: 'U006',
+    status: 'notified',
+    createTime: '2026-06-15 15:30',
+    projectName: '年度预算',
+    level: 'confidential'
+  },
+  {
+    id: 'NOT002',
+    type: 'approval-result',
+    title: '审批结果通知',
+    fileName: '客户名单及联系方式.xlsx',
+    fileId: 'FILE007',
+    approvalId: 'AP007',
+    decision: 'time-limited',
+    decisionReason: '限时3天，仅供本次拜访使用',
+    decisionTime: '2026-06-10 11:20',
+    deadline: '2026-06-13',
+    fromUser: '王总',
+    toUserId: 'U007',
+    status: 'notified',
+    createTime: '2026-06-10 11:20',
+    projectName: '客户关系管理',
+    level: 'secret'
+  }
+];
+
+pendingApprovals.forEach((item, index) => {
+  if (myProjects.includes(item.projectId)) {
+    item.projectOwnership = 'mine';
+  } else if (index % 2 === 0) {
+    item.projectOwnership = 'transfer';
+  } else {
+    item.projectOwnership = 'neutral';
+  }
+  item.notificationStatus = 'unread';
+});
+
+decisionHistory.forEach((item) => {
+  item.notificationStatus = 'notified';
+  if (item.decision === 'time-limited' && !item.deadline) {
+    item.deadline = '2026-06-13';
+  }
+});

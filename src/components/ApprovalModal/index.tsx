@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, Textarea, Button } from '@tarojs/components';
+import React, { useState, useMemo } from 'react';
+import { View, Text, Textarea, Button, Picker } from '@tarojs/components';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import { DecisionType } from '@/types/approval';
+import { dateUtils } from '@/utils/date';
 
 interface ApprovalModalProps {
   visible: boolean;
   fileName: string;
   onClose: () => void;
-  onConfirm: (decision: DecisionType, reason: string) => void;
+  onConfirm: (decision: DecisionType, reason: string, deadline?: string) => void;
 }
 
 interface DecisionOption {
@@ -53,10 +54,16 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 }) => {
   const [selectedType, setSelectedType] = useState<DecisionType | null>(null);
   const [reason, setReason] = useState('');
+  const [selectedDeadline, setSelectedDeadline] = useState<string>('');
+
+  const deadlineOptions = useMemo(() => {
+    return dateUtils.generateDeadlineOptions();
+  }, []);
 
   const handleClose = () => {
     setSelectedType(null);
     setReason('');
+    setSelectedDeadline('');
     onClose();
   };
 
@@ -67,12 +74,28 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     if (!reason.trim()) {
       return;
     }
-    onConfirm(selectedType, reason.trim());
+    if (selectedType === 'time-limited' && !selectedDeadline) {
+      return;
+    }
+    onConfirm(
+      selectedType,
+      reason.trim(),
+      selectedType === 'time-limited' ? selectedDeadline : undefined
+    );
     setSelectedType(null);
     setReason('');
+    setSelectedDeadline('');
   };
 
-  const canSubmit = selectedType && reason.trim().length > 0;
+  const canSubmit = selectedType && reason.trim().length > 0 && 
+    (selectedType !== 'time-limited' || selectedDeadline !== '');
+
+  const handleDeadlineChange = (e: any) => {
+    const index = e.detail.value;
+    if (index >= 0 && index < deadlineOptions.length) {
+      setSelectedDeadline(deadlineOptions[index].value);
+    }
+  };
 
   if (!visible) return null;
 
@@ -117,6 +140,30 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             </View>
           ))}
         </View>
+
+        {selectedType === 'time-limited' && (
+          <View className={styles.deadlineSection}>
+            <Text className={styles.deadlineTitle}>截止时间<Text className={styles.required}>*</Text></Text>
+            <Picker
+              mode="selector"
+              range={deadlineOptions.map(opt => opt.label)}
+              value={deadlineOptions.findIndex(opt => opt.value === selectedDeadline)}
+              onChange={handleDeadlineChange}
+            >
+              <View className={styles.deadlinePicker}>
+                <Text className={selectedDeadline ? styles.deadlineValue : styles.deadlinePlaceholder}>
+                  {selectedDeadline ? selectedDeadline : '请选择截止时间'}
+                </Text>
+                <Text className={styles.pickerArrow}>▼</Text>
+              </View>
+            </Picker>
+            {selectedDeadline && (
+              <Text className={styles.deadlineHint}>
+                到期后权限将自动失效
+              </Text>
+            )}
+          </View>
+        )}
 
         <View className={styles.reasonSection}>
           <Text className={styles.reasonTitle}>审批理由<Text className={styles.required}>*</Text></Text>
