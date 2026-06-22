@@ -424,7 +424,6 @@ pendingApprovals.forEach((item, index) => {
   } else {
     item.projectOwnership = 'neutral';
   }
-  item.notificationStatus = 'unread';
 });
 
 decisionHistory.forEach((item) => {

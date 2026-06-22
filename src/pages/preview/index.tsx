@@ -58,7 +58,7 @@ const DirectoryTree: React.FC<{ nodes: DirectoryNode[] }> = ({ nodes }) => {
 
 const PreviewPage: React.FC = () => {
   const router = useRouter();
-  const { getApprovalById, makeDecision, initStore, notificationList, isInitialized, checkAndUpdateExpiredItems } = useApprovalStore();
+  const { getApprovalById, makeDecision, initStore, notificationList, checkAndUpdateExpiredItems } = useApprovalStore();
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -66,10 +66,8 @@ const PreviewPage: React.FC = () => {
   const approval = getApprovalById(approvalId);
 
   useEffect(() => {
-    if (!isInitialized) {
-      initStore();
-    }
-  }, [isInitialized, initStore]);
+    initStore();
+  }, [initStore]);
 
   const isPending = approval?.status === 'pending';
 
@@ -82,7 +80,7 @@ const PreviewPage: React.FC = () => {
 
   const relatedNotification = useMemo(() => {
     if (!approval || approval.status === 'pending') return null;
-    return notificationList.find((n: NotificationItem) => n.approvalId === approvalId);
+    return notificationList.find((n: NotificationItem) => n.approvalId === approvalId) || null;
   }, [approval, approvalId, notificationList]);
 
   const fileTypeIcon = useMemo(() => {
@@ -118,26 +116,11 @@ const PreviewPage: React.FC = () => {
     setTimeout(() => {
       Taro.navigateBack();
     }, 1500);
-
-    console.log('[PreviewPage] 提交审批', { id: approval.id, decision, reason, deadline });
   };
 
   useDidShow(() => {
-    if (isInitialized) {
-      checkAndUpdateExpiredItems();
-    }
-    console.log('[PreviewPage] 页面显示，审批ID:', approvalId);
+    checkAndUpdateExpiredItems();
   });
-
-  if (!isInitialized) {
-    return (
-      <View className={styles.page}>
-        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
-          <Text style={{ color: '#86909C' }}>加载中...</Text>
-        </View>
-      </View>
-    );
-  }
 
   if (!approval) {
     return (
@@ -181,9 +164,11 @@ const PreviewPage: React.FC = () => {
                 <Text className={classnames(styles.resultStatus, isExpired && styles.expiredText)}>
                   {statusTextMap[isExpired ? 'expired' : approval.status] || approval.status}
                 </Text>
-                <Text className={styles.resultTime}>
-                  审批时间：{approval.decisionTime}
-                </Text>
+                {approval.decisionTime && (
+                  <Text className={styles.resultTime}>
+                    审批时间：{approval.decisionTime}
+                  </Text>
+                )}
               </View>
             </View>
 
@@ -210,10 +195,25 @@ const PreviewPage: React.FC = () => {
               </View>
             )}
 
-            {approval.notificationStatus === 'notified' && (
-              <View className={styles.notificationInfo}>
-                <Text className={styles.notificationIcon}>✓</Text>
-                <Text className={styles.notificationText}>已通知申请人</Text>
+            {approval.transferRecord && (
+              <View className={styles.transferInfo}>
+                <Text className={styles.transferInfoTitle}>转交记录</Text>
+                <View className={styles.transferInfoRow}>
+                  <Text className={styles.transferInfoLabel}>转交人</Text>
+                  <Text className={styles.transferInfoValue}>{approval.transferRecord.fromApproverName}</Text>
+                </View>
+                <View className={styles.transferInfoRow}>
+                  <Text className={styles.transferInfoLabel}>接收人</Text>
+                  <Text className={styles.transferInfoValue}>{approval.transferRecord.toApproverName}</Text>
+                </View>
+                <View className={styles.transferInfoRow}>
+                  <Text className={styles.transferInfoLabel}>转交理由</Text>
+                  <Text className={styles.transferInfoValue}>{approval.transferRecord.transferReason}</Text>
+                </View>
+                <View className={styles.transferInfoRow}>
+                  <Text className={styles.transferInfoLabel}>转交时间</Text>
+                  <Text className={styles.transferInfoValue}>{approval.transferRecord.transferTime}</Text>
+                </View>
               </View>
             )}
 
@@ -227,6 +227,32 @@ const PreviewPage: React.FC = () => {
                 <View className={styles.notificationDetailItem}>
                   <Text className={styles.notificationDetailLabel}>通知对象</Text>
                   <Text className={styles.notificationDetailValue}>{approval.applicant.name}</Text>
+                </View>
+                {relatedNotification.decision && (
+                  <View className={styles.notificationDetailItem}>
+                    <Text className={styles.notificationDetailLabel}>审批结论</Text>
+                    <Text className={styles.notificationDetailValue}>
+                      {statusTextMap[relatedNotification.decision] || relatedNotification.decision}
+                    </Text>
+                  </View>
+                )}
+                {relatedNotification.decisionReason && (
+                  <View className={styles.notificationDetailItem}>
+                    <Text className={styles.notificationDetailLabel}>审批理由</Text>
+                    <Text className={styles.notificationDetailValue}>{relatedNotification.decisionReason}</Text>
+                  </View>
+                )}
+                {relatedNotification.deadline && (
+                  <View className={styles.notificationDetailItem}>
+                    <Text className={styles.notificationDetailLabel}>截止时间</Text>
+                    <Text className={styles.notificationDetailValue}>{relatedNotification.deadline}</Text>
+                  </View>
+                )}
+                <View className={styles.notificationDetailItem}>
+                  <Text className={styles.notificationDetailLabel}>通知状态</Text>
+                  <Text className={styles.notificationDetailValue}>
+                    {relatedNotification.status === 'notified' ? '已通知' : relatedNotification.status === 'read' ? '已读' : '未读'}
+                  </Text>
                 </View>
               </View>
             )}

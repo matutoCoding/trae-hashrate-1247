@@ -1,44 +1,82 @@
-import Taro from '@tarojs/taro';
 import { ApprovalItem, NotificationItem, StorageData } from '@/types/approval';
 
 const STORAGE_KEY = 'approval_storage_data_v1';
 
+const getLocalStorage = (): StorageData | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch (_e) {
+    console.log('[Storage] localStorage read failed');
+  }
+  return null;
+};
+
+const setLocalStorage = (data: StorageData) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (_e) {
+    console.error('[Storage] localStorage write failed');
+  }
+};
+
+const removeLocalStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (_e) {
+    console.error('[Storage] localStorage remove failed');
+  }
+};
+
 export const storageUtils = {
   async saveData(data: StorageData): Promise<void> {
+    const saveData = {
+      ...data,
+      lastUpdated: new Date().toISOString()
+    };
+    setLocalStorage(saveData);
+
     try {
-      await Taro.setStorage({
+      const Taro = require('@tarojs/taro');
+      await Taro.default.setStorage({
         key: STORAGE_KEY,
-        data: {
-          ...data,
-          lastUpdated: new Date().toISOString()
-        }
+        data: saveData
       });
-      console.log('[Storage] 数据已保存');
-    } catch (error) {
-      console.error('[Storage] 保存数据失败:', error);
+    } catch (_e) {
+      console.log('[Storage] Taro.setStorage skipped');
     }
   },
 
   async loadData(): Promise<StorageData | null> {
+    const localData = getLocalStorage();
+    if (localData) {
+      return localData;
+    }
+
     try {
-      const result = await Taro.getStorage({ key: STORAGE_KEY });
+      const Taro = require('@tarojs/taro');
+      const result = await Taro.default.getStorage({ key: STORAGE_KEY });
       if (result.data) {
-        console.log('[Storage] 数据已加载');
+        setLocalStorage(result.data);
         return result.data;
       }
-      return null;
-    } catch (error) {
-      console.log('[Storage] 无本地缓存数据');
-      return null;
+    } catch (_e) {
+      console.log('[Storage] Taro.getStorage empty');
     }
+
+    return null;
   },
 
   async clearData(): Promise<void> {
+    removeLocalStorage();
+
     try {
-      await Taro.removeStorage({ key: STORAGE_KEY });
-      console.log('[Storage] 数据已清除');
-    } catch (error) {
-      console.error('[Storage] 清除数据失败:', error);
+      const Taro = require('@tarojs/taro');
+      await Taro.default.removeStorage({ key: STORAGE_KEY });
+    } catch (_e) {
+      console.log('[Storage] Taro.removeStorage skipped');
     }
   },
 
@@ -73,7 +111,6 @@ export const storageUtils = {
   ): Promise<StorageData> {
     const existingData = await this.loadData();
     if (existingData) {
-      console.log('[Storage] 使用现有缓存数据');
       return existingData;
     }
 
@@ -85,7 +122,6 @@ export const storageUtils = {
     };
 
     await this.saveData(initialData);
-    console.log('[Storage] 初始化数据已保存');
     return initialData;
   }
 };

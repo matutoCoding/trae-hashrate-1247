@@ -33,8 +33,7 @@ const PendingPage: React.FC = () => {
     setSelectedLevel,
     getFilteredPendingList,
     initStore,
-    checkAndUpdateExpiredItems,
-    isInitialized
+    checkAndUpdateExpiredItems
   } = useApprovalStore();
 
   const [selectedOwnership, setSelectedOwnership] = useState<ProjectOwnership | 'all'>('all');
@@ -42,10 +41,8 @@ const PendingPage: React.FC = () => {
   const [transferItem, setTransferItem] = useState<ApprovalItem | null>(null);
 
   useEffect(() => {
-    if (!isInitialized) {
-      initStore();
-    }
-  }, [isInitialized, initStore]);
+    initStore();
+  }, [initStore]);
 
   const filteredList = useMemo(() => {
     let list = getFilteredPendingList();
@@ -115,21 +112,8 @@ const PendingPage: React.FC = () => {
   });
 
   useDidShow(() => {
-    if (isInitialized) {
-      checkAndUpdateExpiredItems();
-    }
-    console.log('[PendingPage] 页面显示，待审批数量:', pendingList.length);
+    checkAndUpdateExpiredItems();
   });
-
-  if (!isInitialized) {
-    return (
-      <View className={styles.page}>
-        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
-          <Text style={{ color: '#86909C' }}>加载中...</Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <ScrollView scrollY className={styles.page}>

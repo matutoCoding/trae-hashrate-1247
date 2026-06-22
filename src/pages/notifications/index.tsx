@@ -25,7 +25,6 @@ const NotificationsPage: React.FC = () => {
   const {
     notificationList,
     initStore,
-    isInitialized,
     markNotificationRead,
     markAllNotificationsRead,
     getUnreadNotificationCount
@@ -34,10 +33,8 @@ const NotificationsPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<NotificationType | 'all'>('all');
 
   useEffect(() => {
-    if (!isInitialized) {
-      initStore();
-    }
-  }, [isInitialized, initStore]);
+    initStore();
+  }, [initStore]);
 
   const filteredList = useMemo(() => {
     if (selectedType === 'all') {
@@ -91,18 +88,8 @@ const NotificationsPage: React.FC = () => {
   });
 
   useDidShow(() => {
-    console.log('[NotificationsPage] 页面显示，通知数量:', notificationList.length);
+    console.log('[NotificationsPage] page show, count:', notificationList.length);
   });
-
-  if (!isInitialized) {
-    return (
-      <View className={styles.page}>
-        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
-          <Text style={{ color: '#86909C' }}>加载中...</Text>
-        </View>
-      </View>
-    );
-  }
 
   const typeFilters: { value: NotificationType | 'all'; label: string }[] = [
     { value: 'all', label: '全部' },

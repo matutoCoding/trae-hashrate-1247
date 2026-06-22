@@ -159,7 +159,7 @@
 
 .screenshotSection {
   .screenshotsScroll {
-    margin: 0 -$spacing-lg;
+    margin: 0 (-$spacing-lg);
     padding: 0 $spacing-lg;
   }
 
@@ -461,6 +461,40 @@
       }
 
       .notificationDetailValue {
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+        flex: 1;
+      }
+    }
+  }
+
+  .transferInfo {
+    background-color: rgba(156, 39, 176, 0.06);
+    border: 1rpx solid rgba(156, 39, 176, 0.15);
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    .transferInfoTitle {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: #9C27B0;
+      margin-bottom: $spacing-sm;
+    }
+
+    .transferInfoRow {
+      display: flex;
+      align-items: flex-start;
+      margin-top: $spacing-xs;
+
+      .transferInfoLabel {
+        font-size: $font-size-sm;
+        color: $color-text-tertiary;
+        width: 120rpx;
+        flex-shrink: 0;
+      }
+
+      .transferInfoValue {
         font-size: $font-size-sm;
         color: $color-text-secondary;
         flex: 1;

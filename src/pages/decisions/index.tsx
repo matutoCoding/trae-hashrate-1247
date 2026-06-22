@@ -16,15 +16,13 @@ interface StatusFilter {
 }
 
 const DecisionsPage: React.FC = () => {
-  const { historyList, getProjectGroups, initStore, checkAndUpdateExpiredItems, isInitialized } = useApprovalStore();
+  const { historyList, getProjectGroups, initStore, checkAndUpdateExpiredItems } = useApprovalStore();
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!isInitialized) {
-      initStore();
-    }
-  }, [isInitialized, initStore]);
+    initStore();
+  }, [initStore]);
 
   const statusFilters: StatusFilter[] = [
     { value: 'all', label: '全部' },
@@ -75,10 +73,7 @@ const DecisionsPage: React.FC = () => {
   });
 
   useDidShow(() => {
-    if (isInitialized) {
-      checkAndUpdateExpiredItems();
-    }
-    console.log('[DecisionsPage] 页面显示，历史决策数量:', historyList.length);
+    checkAndUpdateExpiredItems();
     if (projectGroups.length > 0 && expandedProjects.size === 0) {
       setExpandedProjects(new Set([projectGroups[0].projectId]));
     }
@@ -87,16 +82,6 @@ const DecisionsPage: React.FC = () => {
   const getProjectInitial = (name: string) => {
     return name.charAt(0);
   };
-
-  if (!isInitialized) {
-    return (
-      <View className={styles.page}>
-        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
-          <Text style={{ color: '#86909C' }}>加载中...</Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <ScrollView scrollY className={styles.page}>

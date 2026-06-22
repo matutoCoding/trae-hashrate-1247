@@ -16,13 +16,11 @@ interface MenuItem {
 }
 
 const MinePage: React.FC = () => {
-  const { pendingList, initStore, isInitialized, getUnreadNotificationCount, notificationList } = useApprovalStore();
+  const { pendingList, initStore, getUnreadNotificationCount, notificationList } = useApprovalStore();
 
   useEffect(() => {
-    if (!isInitialized) {
-      initStore();
-    }
-  }, [isInitialized, initStore]);
+    initStore();
+  }, [initStore]);
 
   const unreadCount = useMemo(() => {
     return getUnreadNotificationCount();
@@ -89,18 +87,8 @@ const MinePage: React.FC = () => {
   ];
 
   useDidShow(() => {
-    console.log('[MinePage] 页面显示');
+    console.log('[MinePage] page show');
   });
-
-  if (!isInitialized) {
-    return (
-      <View className={styles.page}>
-        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
-          <Text style={{ color: '#86909C' }}>加载中...</Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <ScrollView scrollY className={styles.page}>

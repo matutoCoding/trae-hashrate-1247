@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ApprovalItem, DecisionType, ProjectGroup, NotificationItem, NotificationType, ApproverInfo, TransferRecord } from '@/types/approval';
-import { pendingApprovals, decisionHistory, notificationList, approverList, currentUser } from '@/data/mockData';
+import { pendingApprovals, decisionHistory, notificationList as initialNotificationList, approverList, currentUser } from '@/data/mockData';
 import { storageUtils } from '@/utils/storage';
 import { dateUtils } from '@/utils/date';
 
@@ -30,12 +30,6 @@ interface ApprovalStore {
   clearStorage: () => Promise<void>;
 }
 
-let storeState: {
-  pendingList: ApprovalItem[];
-  historyList: ApprovalItem[];
-  notificationList: NotificationItem[];
-} | null = null;
-
 const saveToStorage = async (
   pendingList: ApprovalItem[],
   historyList: ApprovalItem[],
@@ -48,8 +42,8 @@ const saveToStorage = async (
       notificationList,
       lastUpdated: new Date().toISOString()
     });
-  } catch (error) {
-    console.error('[Store] 保存到存储失败:', error);
+  } catch (_error) {
+    console.error('[Store] saveToStorage failed');
   }
 };
 
@@ -64,12 +58,6 @@ const createNotification = (
   deadline?: string
 ): NotificationItem => {
   const now = dateUtils.getCurrentDateTime();
-  const decisionText: Record<DecisionType, string> = {
-    'approve': '已同意',
-    'reject': '已驳回',
-    'time-limited': '限时同意',
-    'online-only': '仅在线查看'
-  };
 
   return {
     id: generateNotificationId(),
@@ -108,7 +96,7 @@ const createTransferNotification = (
     decisionTime: now,
     fromUser: transferRecord.fromApproverName,
     toUserId: transferRecord.toApproverId,
-    status: 'unread',
+    status: 'notified',
     createTime: now,
     projectName: item.projectName,
     level: item.level
@@ -116,9 +104,9 @@ const createTransferNotification = (
 };
 
 export const useApprovalStore = create<ApprovalStore>((set, get) => ({
-  pendingList: [],
-  historyList: [],
-  notificationList: [],
+  pendingList: pendingApprovals,
+  historyList: decisionHistory,
+  notificationList: initialNotificationList,
   selectedProject: null,
   selectedLevel: null,
   isInitialized: false,
@@ -127,44 +115,37 @@ export const useApprovalStore = create<ApprovalStore>((set, get) => ({
     if (get().isInitialized) return;
 
     try {
-      const storedData = await storageUtils.initStorage(
-        pendingApprovals,
-        decisionHistory,
-        notificationList
-      );
+      const storedData = await storageUtils.loadData();
+      if (storedData) {
+        const pendingList = storedData.pendingList.map(item => {
+          if (item.deadline && dateUtils.isExpired(item.deadline)) {
+            return { ...item, status: 'expired' as const };
+          }
+          return item;
+        });
 
-      const pendingList = storedData.pendingList.map(item => {
-        if (item.deadline && dateUtils.isExpired(item.deadline)) {
-          return { ...item, status: 'expired' };
-        }
-        return item;
-      });
+        const historyList = storedData.historyList.map(item => {
+          if (item.deadline && dateUtils.isExpired(item.deadline) && item.status === 'time-limited') {
+            return { ...item, status: 'expired' as const };
+          }
+          return item;
+        });
 
-      const historyList = storedData.historyList.map(item => {
-        if (item.deadline && dateUtils.isExpired(item.deadline) && item.status === 'time-limited') {
-          return { ...item, status: 'expired' };
-        }
-        return item;
-      });
+        set({
+          pendingList,
+          historyList,
+          notificationList: storedData.notificationList,
+          isInitialized: true
+        });
 
-      set({
-        pendingList,
-        historyList,
-        notificationList: storedData.notificationList,
-        isInitialized: true
-      });
-
-      storeState = { pendingList, historyList, notificationList: storedData.notificationList };
-
-      console.log('[Store] 初始化完成，待审批:', pendingList.length, '历史:', historyList.length);
-    } catch (error) {
-      console.error('[Store] 初始化失败:', error);
-      set({
-        pendingList: pendingApprovals,
-        historyList: decisionHistory,
-        notificationList: notificationList,
-        isInitialized: true
-      });
+        console.log('[Store] initStore from storage, pending:', pendingList.length, 'history:', historyList.length);
+      } else {
+        set({ isInitialized: true });
+        console.log('[Store] initStore from mock data, pending:', get().pendingList.length, 'history:', get().historyList.length);
+      }
+    } catch (_error) {
+      set({ isInitialized: true });
+      console.log('[Store] initStore fallback to mock data');
     }
   },
 
@@ -270,11 +251,11 @@ export const useApprovalStore = create<ApprovalStore>((set, get) => ({
 
     saveToStorage(newPendingList, newHistoryList, newNotificationList);
 
-    console.log('[Store] 审批完成', { id, decision, reason, deadline });
+    console.log('[Store] makeDecision', { id, decision, reason, deadline });
   },
 
   transferApproval: (id, toApproverId, toApproverName, reason) => {
-    const { pendingList, notificationList } = get();
+    const { pendingList, historyList, notificationList } = get();
     const itemIndex = pendingList.findIndex((item) => item.id === id);
 
     if (itemIndex === -1) return;
@@ -301,21 +282,24 @@ export const useApprovalStore = create<ApprovalStore>((set, get) => ({
     const newPendingList = [...pendingList];
     newPendingList.splice(itemIndex, 1);
 
+    const newHistoryList = [transferredItem, ...historyList];
+
     const notification = createTransferNotification(item, transferRecord);
     const newNotificationList = [notification, ...notificationList];
 
     set({
       pendingList: newPendingList,
+      historyList: newHistoryList,
       notificationList: newNotificationList
     });
 
-    saveToStorage(newPendingList, get().historyList, newNotificationList);
+    saveToStorage(newPendingList, newHistoryList, newNotificationList);
 
-    console.log('[Store] 转交完成', { id, toApproverId, toApproverName, reason });
+    console.log('[Store] transferApproval', { id, toApproverId, toApproverName, reason });
   },
 
   markNotificationRead: (notificationId) => {
-    const { notificationList } = get();
+    const { notificationList, pendingList, historyList } = get();
     const newNotificationList = notificationList.map(n => {
       if (n.id === notificationId && n.status === 'unread') {
         return {
@@ -328,11 +312,11 @@ export const useApprovalStore = create<ApprovalStore>((set, get) => ({
     });
 
     set({ notificationList: newNotificationList });
-    saveToStorage(get().pendingList, get().historyList, newNotificationList);
+    saveToStorage(pendingList, historyList, newNotificationList);
   },
 
   markAllNotificationsRead: () => {
-    const { notificationList } = get();
+    const { notificationList, pendingList, historyList } = get();
     const now = dateUtils.getCurrentDateTime();
     const newNotificationList = notificationList.map(n => {
       if (n.status === 'unread') {
@@ -346,11 +330,11 @@ export const useApprovalStore = create<ApprovalStore>((set, get) => ({
     });
 
     set({ notificationList: newNotificationList });
-    saveToStorage(get().pendingList, get().historyList, newNotificationList);
+    saveToStorage(pendingList, historyList, newNotificationList);
   },
 
   checkAndUpdateExpiredItems: () => {
-    const { pendingList, historyList } = get();
+    const { pendingList, historyList, notificationList } = get();
     let hasChanges = false;
 
     const updatedPendingList = pendingList.map(item => {
@@ -374,8 +358,8 @@ export const useApprovalStore = create<ApprovalStore>((set, get) => ({
         pendingList: updatedPendingList,
         historyList: updatedHistoryList
       });
-      saveToStorage(updatedPendingList, updatedHistoryList, get().notificationList);
-      console.log('[Store] 已更新过期项目');
+      saveToStorage(updatedPendingList, updatedHistoryList, notificationList);
+      console.log('[Store] checkAndUpdateExpiredItems updated');
     }
   },
 
@@ -384,9 +368,9 @@ export const useApprovalStore = create<ApprovalStore>((set, get) => ({
     set({
       pendingList: pendingApprovals,
       historyList: decisionHistory,
-      notificationList: notificationList,
+      notificationList: initialNotificationList,
       isInitialized: false
     });
-    console.log('[Store] 存储已清除');
+    console.log('[Store] clearStorage done');
   }
 }));
