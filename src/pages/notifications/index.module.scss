@@ -1,0 +1,302 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+}
+
+.header {
+  background: $gradient-primary;
+  padding: $spacing-lg $spacing-lg $spacing-xl;
+  color: $color-text-white;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+}
+
+.markAllBtn {
+  padding: $spacing-sm $spacing-md;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-xs;
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  .markAllText {
+    font-size: $font-size-sm;
+    color: $color-text-white;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.headerSubtitle {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.filterSection {
+  margin-top: -$spacing-lg;
+  padding: 0 $spacing-lg;
+}
+
+.filterScroll {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-float;
+  padding: $spacing-md $spacing-lg;
+  white-space: nowrap;
+}
+
+.filterTags {
+  display: inline-flex;
+  gap: $spacing-md;
+}
+
+.filterTag {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-lg;
+  background-color: $color-bg-gray;
+  border-radius: $radius-xs;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.active {
+    background-color: $color-primary;
+    color: $color-text-white;
+  }
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.filterBadge {
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 $spacing-xs;
+  background-color: $color-error;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: $spacing-xs;
+}
+
+.listSection {
+  padding: $spacing-lg;
+}
+
+.notificationCard {
+  position: relative;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &.unread {
+    background-color: rgba(30, 90, 232, 0.04);
+    border-left: 6rpx solid $color-primary;
+  }
+
+  &:active {
+    opacity: 0.92;
+    transform: scale(0.99);
+  }
+}
+
+.unreadDot {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+  width: 16rpx;
+  height: 16rpx;
+  background-color: $color-error;
+  border-radius: $radius-round;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.iconBox {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: $radius-md;
+  background-color: rgba(30, 90, 232, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+
+  .iconText {
+    font-size: 32rpx;
+  }
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.notificationTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.notificationTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.cardBody {
+  margin-bottom: $spacing-md;
+}
+
+.fileName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  @include text-ellipsis-multi(2);
+}
+
+.projectTag {
+  display: inline-block;
+  margin-top: $spacing-sm;
+  padding: 4rpx 16rpx;
+  background-color: rgba(30, 90, 232, 0.08);
+  border-radius: $radius-xs;
+
+  .projectTagText {
+    font-size: $font-size-sm;
+    color: $color-primary;
+  }
+}
+
+.decisionInfo,
+.deadlineInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.decisionLabel,
+.deadlineLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.decisionValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &.approve {
+    color: $color-success;
+  }
+
+  &.reject {
+    color: $color-error;
+  }
+
+  &.time-limited {
+    color: $color-warning;
+  }
+
+  &.online-only {
+    color: $color-primary;
+  }
+}
+
+.deadlineValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-warning;
+}
+
+.reasonBox {
+  background-color: $color-bg-gray;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.reasonLabel {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: 8rpx;
+}
+
+.reasonText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-border-light;
+}
+
+.footerText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.viewDetail {
+  .viewDetailText {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.emptyState {
+  padding: 100rpx 32rpx;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 120rpx;
+  height: 120rpx;
+  margin: 0 auto $spacing-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .iconText {
+    font-size: 80rpx;
+  }
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

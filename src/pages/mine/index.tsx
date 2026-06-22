@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import { useDidShow } from '@tarojs/taro';
 import Taro from '@tarojs/taro';
@@ -16,7 +16,17 @@ interface MenuItem {
 }
 
 const MinePage: React.FC = () => {
-  const { pendingList } = useApprovalStore();
+  const { pendingList, initStore, isInitialized, getUnreadNotificationCount, notificationList } = useApprovalStore();
+
+  useEffect(() => {
+    if (!isInitialized) {
+      initStore();
+    }
+  }, [isInitialized, initStore]);
+
+  const unreadCount = useMemo(() => {
+    return getUnreadNotificationCount();
+  }, [notificationList, getUnreadNotificationCount]);
 
   const handleMenuClick = (title: string) => {
     Taro.showToast({
@@ -46,8 +56,11 @@ const MinePage: React.FC = () => {
       icon: '🔔',
       iconType: 'warning',
       title: '消息通知',
-      badge: 3,
-      onClick: () => handleMenuClick('消息通知')
+      desc: unreadCount > 0 ? `您有 ${unreadCount} 条未读消息` : '暂无未读消息',
+      badge: unreadCount > 0 ? unreadCount : undefined,
+      onClick: () => {
+        Taro.navigateTo({ url: '/pages/notifications/index' });
+      }
     }
   ];
 
@@ -78,6 +91,16 @@ const MinePage: React.FC = () => {
   useDidShow(() => {
     console.log('[MinePage] 页面显示');
   });
+
+  if (!isInitialized) {
+    return (
+      <View className={styles.page}>
+        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
+          <Text style={{ color: '#86909C' }}>加载中...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView scrollY className={styles.page}>

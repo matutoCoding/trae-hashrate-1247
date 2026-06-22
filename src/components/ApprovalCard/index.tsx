@@ -3,14 +3,22 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import LevelTag from '@/components/LevelTag';
-import { ApprovalItem } from '@/types/approval';
+import { ApprovalItem, ProjectOwnership } from '@/types/approval';
+import classnames from 'classnames';
 
 interface ApprovalCardProps {
   item: ApprovalItem;
   onClick?: () => void;
+  onTransfer?: (item: ApprovalItem) => void;
 }
 
-const ApprovalCard: React.FC<ApprovalCardProps> = ({ item, onClick }) => {
+const ownershipTextMap: Record<ProjectOwnership, string> = {
+  mine: '我负责',
+  transfer: '建议转交',
+  neutral: ''
+};
+
+const ApprovalCard: React.FC<ApprovalCardProps> = ({ item, onClick, onTransfer }) => {
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -21,8 +29,19 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({ item, onClick }) => {
     }
   };
 
+  const handleTransferClick = (e: any) => {
+    e.stopPropagation();
+    if (onTransfer) {
+      onTransfer(item);
+    }
+  };
+
+  const ownership = item.projectOwnership || 'neutral';
+  const showOwnership = ownership !== 'neutral';
+  const showTransferBtn = ownership === 'transfer';
+
   return (
-    <View className={styles.card} onClick={handleClick}>
+    <View className={classnames(styles.card, showOwnership && styles.hasOwnership)} onClick={handleClick}>
       <View className={styles.cardHeader}>
         <View className={styles.applicantInfo}>
           <Image
@@ -37,6 +56,14 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({ item, onClick }) => {
         </View>
         <View className={styles.headerRight}>
           <LevelTag level={item.level} size="small" />
+          {showOwnership && (
+            <Text className={classnames(
+              styles.ownershipTag,
+              styles[ownership]
+            )}>
+              {ownershipTextMap[ownership]}
+            </Text>
+          )}
         </View>
       </View>
 
@@ -60,8 +87,15 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({ item, onClick }) => {
 
       <View className={styles.cardFooter}>
         <Text className={styles.applyTime}>申请时间：{item.applyTime}</Text>
-        <View className={styles.viewDetail}>
-          <Text className={styles.viewDetailText}>查看详情</Text>
+        <View className={styles.footerRight}>
+          {showTransferBtn && (
+            <View className={styles.transferBtn} onClick={handleTransferClick}>
+              <Text className={styles.transferText}>一键转交</Text>
+            </View>
+          )}
+          <View className={styles.viewDetail}>
+            <Text className={styles.viewDetailText}>查看详情</Text>
+          </View>
         </View>
       </View>
     </View>

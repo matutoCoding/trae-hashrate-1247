@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useDidShow, usePullDownRefresh } from '@tarojs/taro';
 import Taro from '@tarojs/taro';
@@ -16,16 +16,24 @@ interface StatusFilter {
 }
 
 const DecisionsPage: React.FC = () => {
-  const { historyList, getProjectGroups } = useApprovalStore();
+  const { historyList, getProjectGroups, initStore, checkAndUpdateExpiredItems, isInitialized } = useApprovalStore();
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!isInitialized) {
+      initStore();
+    }
+  }, [isInitialized, initStore]);
 
   const statusFilters: StatusFilter[] = [
     { value: 'all', label: '全部' },
     { value: 'approved', label: '已同意' },
     { value: 'time-limited', label: '限时同意' },
     { value: 'online-only', label: '仅在线' },
-    { value: 'rejected', label: '已驳回' }
+    { value: 'rejected', label: '已驳回' },
+    { value: 'expired', label: '已过期' },
+    { value: 'transferred', label: '已转交' }
   ];
 
   const filteredList = useMemo(() => {
@@ -44,7 +52,9 @@ const DecisionsPage: React.FC = () => {
     const approved = historyList.filter((i) => i.status === 'approved').length;
     const rejected = historyList.filter((i) => i.status === 'rejected').length;
     const timeLimited = historyList.filter((i) => i.status === 'time-limited').length;
-    return { total, approved, rejected, timeLimited };
+    const expired = historyList.filter((i) => i.status === 'expired').length;
+    const transferred = historyList.filter((i) => i.status === 'transferred').length;
+    return { total, approved, rejected, timeLimited, expired, transferred };
   }, [historyList]);
 
   const toggleProject = (projectId: string) => {
@@ -58,12 +68,16 @@ const DecisionsPage: React.FC = () => {
   };
 
   usePullDownRefresh(() => {
+    checkAndUpdateExpiredItems();
     setTimeout(() => {
       Taro.stopPullDownRefresh();
     }, 800);
   });
 
   useDidShow(() => {
+    if (isInitialized) {
+      checkAndUpdateExpiredItems();
+    }
     console.log('[DecisionsPage] 页面显示，历史决策数量:', historyList.length);
     if (projectGroups.length > 0 && expandedProjects.size === 0) {
       setExpandedProjects(new Set([projectGroups[0].projectId]));
@@ -73,6 +87,16 @@ const DecisionsPage: React.FC = () => {
   const getProjectInitial = (name: string) => {
     return name.charAt(0);
   };
+
+  if (!isInitialized) {
+    return (
+      <View className={styles.page}>
+        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
+          <Text style={{ color: '#86909C' }}>加载中...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView scrollY className={styles.page}>
@@ -94,6 +118,16 @@ const DecisionsPage: React.FC = () => {
           <View className={styles.statItem}>
             <Text className={styles.statNumber}>{stats.rejected}</Text>
             <Text className={styles.statLabel}>已驳回</Text>
+          </View>
+        </View>
+        <View className={styles.statsRow}>
+          <View className={styles.statItem}>
+            <Text className={classnames(styles.statNumber, styles.expired)}>{stats.expired}</Text>
+            <Text className={styles.statLabel}>已过期</Text>
+          </View>
+          <View className={styles.statItem}>
+            <Text className={classnames(styles.statNumber, styles.transferred)}>{stats.transferred}</Text>
+            <Text className={styles.statLabel}>已转交</Text>
           </View>
         </View>
       </View>

@@ -3,7 +3,8 @@ export default defineAppConfig({
     'pages/pending/index',
     'pages/decisions/index',
     'pages/mine/index',
-    'pages/preview/index'
+    'pages/preview/index',
+    'pages/notifications/index'
   ],
   window: {
     backgroundTextStyle: 'light',

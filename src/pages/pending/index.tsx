@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useDidShow, usePullDownRefresh } from '@tarojs/taro';
 import Taro from '@tarojs/taro';
@@ -6,7 +6,8 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useApprovalStore } from '@/store/approval';
 import ApprovalCard from '@/components/ApprovalCard';
-import { ApprovalLevel } from '@/types/approval';
+import TransferModal from '@/components/TransferModal';
+import { ApprovalLevel, ApprovalItem, ProjectOwnership } from '@/types/approval';
 
 interface ProjectFilter {
   id: string;
@@ -18,6 +19,11 @@ interface LevelFilter {
   label: string;
 }
 
+interface OwnershipFilter {
+  value: ProjectOwnership | 'all';
+  label: string;
+}
+
 const PendingPage: React.FC = () => {
   const {
     pendingList,
@@ -25,10 +31,29 @@ const PendingPage: React.FC = () => {
     selectedLevel,
     setSelectedProject,
     setSelectedLevel,
-    getFilteredPendingList
+    getFilteredPendingList,
+    initStore,
+    checkAndUpdateExpiredItems,
+    isInitialized
   } = useApprovalStore();
 
-  const filteredList = getFilteredPendingList();
+  const [selectedOwnership, setSelectedOwnership] = useState<ProjectOwnership | 'all'>('all');
+  const [transferModalVisible, setTransferModalVisible] = useState(false);
+  const [transferItem, setTransferItem] = useState<ApprovalItem | null>(null);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      initStore();
+    }
+  }, [isInitialized, initStore]);
+
+  const filteredList = useMemo(() => {
+    let list = getFilteredPendingList();
+    if (selectedOwnership !== 'all') {
+      list = list.filter(item => item.projectOwnership === selectedOwnership);
+    }
+    return list;
+  }, [getFilteredPendingList, selectedOwnership]);
 
   const projectList: ProjectFilter[] = useMemo(() => {
     const projectMap = new Map<string, string>();
@@ -47,6 +72,12 @@ const PendingPage: React.FC = () => {
     { value: 'secret', label: '秘密' }
   ];
 
+  const ownershipFilters: OwnershipFilter[] = [
+    { value: 'all', label: '全部' },
+    { value: 'mine', label: '我负责' },
+    { value: 'transfer', label: '需转交' }
+  ];
+
   const handleProjectClick = (projectId: string) => {
     setSelectedProject(selectedProject === projectId ? null : projectId);
   };
@@ -59,15 +90,46 @@ const PendingPage: React.FC = () => {
     }
   };
 
+  const handleOwnershipClick = (ownership: ProjectOwnership | 'all') => {
+    setSelectedOwnership(selectedOwnership === ownership ? 'all' : ownership);
+  };
+
+  const handleTransfer = (item: ApprovalItem) => {
+    setTransferItem(item);
+    setTransferModalVisible(true);
+  };
+
+  const handleTransferSuccess = () => {
+    Taro.showToast({
+      title: '转交成功',
+      icon: 'success',
+      duration: 1500
+    });
+  };
+
   usePullDownRefresh(() => {
+    checkAndUpdateExpiredItems();
     setTimeout(() => {
       Taro.stopPullDownRefresh();
     }, 800);
   });
 
   useDidShow(() => {
+    if (isInitialized) {
+      checkAndUpdateExpiredItems();
+    }
     console.log('[PendingPage] 页面显示，待审批数量:', pendingList.length);
   });
+
+  if (!isInitialized) {
+    return (
+      <View className={styles.page}>
+        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
+          <Text style={{ color: '#86909C' }}>加载中...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView scrollY className={styles.page}>
@@ -80,6 +142,24 @@ const PendingPage: React.FC = () => {
       </View>
 
       <View className={styles.filterSection}>
+        <View className={styles.filterCard}>
+          <Text className={styles.filterTitle}>按归属筛选</Text>
+          <View className={styles.filterTags}>
+            {ownershipFilters.map((filter) => (
+              <View
+                key={filter.value}
+                className={classnames(
+                  styles.filterTag,
+                  selectedOwnership === filter.value && styles.active
+                )}
+                onClick={() => handleOwnershipClick(filter.value)}
+              >
+                {filter.label}
+              </View>
+            ))}
+          </View>
+        </View>
+
         <View className={styles.filterCard}>
           <Text className={styles.filterTitle}>按项目筛选</Text>
           <View className={styles.filterTags}>
@@ -129,7 +209,11 @@ const PendingPage: React.FC = () => {
         {filteredList.length > 0 ? (
           <View>
             {filteredList.map((item) => (
-              <ApprovalCard key={item.id} item={item} />
+              <ApprovalCard
+                key={item.id}
+                item={item}
+                onTransfer={handleTransfer}
+              />
             ))}
           </View>
         ) : (
@@ -141,6 +225,16 @@ const PendingPage: React.FC = () => {
           </View>
         )}
       </View>
+
+      {transferItem && (
+        <TransferModal
+          visible={transferModalVisible}
+          fileName={transferItem.fileName}
+          approvalId={transferItem.id}
+          onClose={() => setTransferModalVisible(false)}
+          onSuccess={handleTransferSuccess}
+        />
+      )}
     </ScrollView>
   );
 };

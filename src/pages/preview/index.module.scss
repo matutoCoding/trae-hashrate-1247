@@ -291,6 +291,11 @@
   box-shadow: $shadow-card;
   margin-bottom: $spacing-md;
 
+  &.expiredResult {
+    opacity: 0.85;
+    background-color: rgba(134, 144, 156, 0.05);
+  }
+
   .resultHeader {
     display: flex;
     align-items: center;
@@ -308,18 +313,32 @@
 
       &.approved {
         background-color: rgba(0, 180, 42, 0.1);
+        color: $color-success;
       }
 
       &.rejected {
         background-color: rgba(245, 63, 63, 0.1);
+        color: $color-error;
       }
 
       &.time-limited {
         background-color: rgba(255, 125, 0, 0.1);
+        color: $color-warning;
       }
 
       &.online-only {
         background-color: rgba(30, 90, 232, 0.1);
+        color: $color-primary;
+      }
+
+      &.expired {
+        background-color: rgba(134, 144, 156, 0.15);
+        color: $color-text-tertiary;
+      }
+
+      &.transferred {
+        background-color: rgba(156, 39, 176, 0.1);
+        color: #9C27B0;
       }
     }
 
@@ -330,6 +349,10 @@
         font-size: $font-size-md;
         font-weight: $font-weight-semibold;
         color: $color-text-primary;
+
+        &.expiredText {
+          color: $color-text-tertiary;
+        }
       }
 
       .resultTime {
@@ -340,10 +363,44 @@
     }
   }
 
+  .deadlineInfo {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-md;
+    padding: $spacing-md;
+    background-color: rgba(255, 125, 0, 0.06);
+    border-radius: $radius-md;
+
+    .deadlineLabel {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+      margin-right: $spacing-sm;
+      flex-shrink: 0;
+    }
+
+    .deadlineValue {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $color-warning;
+
+      &.expiredText {
+        color: $color-text-tertiary;
+      }
+
+      .daysRemaining {
+        font-size: $font-size-xs;
+        color: $color-text-tertiary;
+        font-weight: $font-weight-normal;
+        margin-left: $spacing-xs;
+      }
+    }
+  }
+
   .resultReason {
     background-color: $color-bg-gray;
     border-radius: $radius-md;
     padding: $spacing-md;
+    margin-bottom: $spacing-md;
 
     .reasonLabel {
       font-size: $font-size-sm;
@@ -355,6 +412,59 @@
       font-size: $font-size-sm;
       color: $color-text-secondary;
       line-height: $line-height-normal;
+    }
+  }
+
+  .notificationInfo {
+    display: flex;
+    align-items: center;
+    padding: $spacing-sm $spacing-md;
+    background-color: rgba(30, 90, 232, 0.06);
+    border-radius: $radius-md;
+    margin-bottom: $spacing-md;
+
+    .notificationIcon {
+      font-size: $font-size-sm;
+      color: $color-primary;
+      margin-right: $spacing-sm;
+    }
+
+    .notificationText {
+      font-size: $font-size-sm;
+      color: $color-primary;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .notificationDetail {
+    background-color: $color-bg-gray;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+
+    .notificationDetailTitle {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $color-text-secondary;
+      margin-bottom: $spacing-sm;
+    }
+
+    .notificationDetailItem {
+      display: flex;
+      align-items: flex-start;
+      margin-top: $spacing-xs;
+
+      .notificationDetailLabel {
+        font-size: $font-size-sm;
+        color: $color-text-tertiary;
+        width: 120rpx;
+        flex-shrink: 0;
+      }
+
+      .notificationDetailValue {
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+        flex: 1;
+      }
     }
   }
 }

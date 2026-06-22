@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,24 +8,30 @@ import {
 } from '@tarojs/components';
 import { useRouter, useDidShow } from '@tarojs/taro';
 import Taro from '@tarojs/taro';
+import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useApprovalStore } from '@/store/approval';
 import LevelTag from '@/components/LevelTag';
 import ApprovalModal from '@/components/ApprovalModal';
-import { DecisionType, DirectoryNode } from '@/types/approval';
+import { DecisionType, DirectoryNode, NotificationItem } from '@/types/approval';
+import { dateUtils } from '@/utils/date';
 
 const statusTextMap: Record<string, string> = {
   approved: '已同意',
   rejected: '已驳回',
   'time-limited': '限时同意',
-  'online-only': '仅在线查看'
+  'online-only': '仅在线查看',
+  expired: '已过期',
+  transferred: '已转交'
 };
 
 const statusIconMap: Record<string, string> = {
   approved: '✓',
   rejected: '✕',
   'time-limited': '⏰',
-  'online-only': '👁'
+  'online-only': '👁',
+  expired: '⚠',
+  transferred: '↗'
 };
 
 const DirectoryTree: React.FC<{ nodes: DirectoryNode[] }> = ({ nodes }) => {
@@ -52,14 +58,32 @@ const DirectoryTree: React.FC<{ nodes: DirectoryNode[] }> = ({ nodes }) => {
 
 const PreviewPage: React.FC = () => {
   const router = useRouter();
-  const { getApprovalById, makeDecision } = useApprovalStore();
+  const { getApprovalById, makeDecision, initStore, notificationList, isInitialized, checkAndUpdateExpiredItems } = useApprovalStore();
 
   const [modalVisible, setModalVisible] = useState(false);
 
   const approvalId = router.params.id || '';
   const approval = getApprovalById(approvalId);
 
+  useEffect(() => {
+    if (!isInitialized) {
+      initStore();
+    }
+  }, [isInitialized, initStore]);
+
   const isPending = approval?.status === 'pending';
+
+  const isExpired = useMemo(() => {
+    if (approval?.deadline && dateUtils.isExpired(approval.deadline)) {
+      return true;
+    }
+    return approval?.status === 'expired';
+  }, [approval?.deadline, approval?.status]);
+
+  const relatedNotification = useMemo(() => {
+    if (!approval || approval.status === 'pending') return null;
+    return notificationList.find((n: NotificationItem) => n.approvalId === approvalId);
+  }, [approval, approvalId, notificationList]);
 
   const fileTypeIcon = useMemo(() => {
     if (!approval) return '📄';
@@ -79,10 +103,10 @@ const PreviewPage: React.FC = () => {
     setModalVisible(true);
   };
 
-  const handleConfirm = (decision: DecisionType, reason: string) => {
+  const handleConfirm = (decision: DecisionType, reason: string, deadline?: string) => {
     if (!approval) return;
 
-    makeDecision(approval.id, decision, reason);
+    makeDecision(approval.id, decision, reason, deadline);
     setModalVisible(false);
 
     Taro.showToast({
@@ -95,12 +119,25 @@ const PreviewPage: React.FC = () => {
       Taro.navigateBack();
     }, 1500);
 
-    console.log('[PreviewPage] 提交审批', { id: approval.id, decision, reason });
+    console.log('[PreviewPage] 提交审批', { id: approval.id, decision, reason, deadline });
   };
 
   useDidShow(() => {
+    if (isInitialized) {
+      checkAndUpdateExpiredItems();
+    }
     console.log('[PreviewPage] 页面显示，审批ID:', approvalId);
   });
+
+  if (!isInitialized) {
+    return (
+      <View className={styles.page}>
+        <View style={{ padding: '100rpx 32rpx', textAlign: 'center' }}>
+          <Text style={{ color: '#86909C' }}>加载中...</Text>
+        </View>
+      </View>
+    );
+  }
 
   if (!approval) {
     return (
@@ -135,24 +172,62 @@ const PreviewPage: React.FC = () => {
         </View>
 
         {!isPending && approval.decision && (
-          <View className={styles.decisionResult}>
+          <View className={classnames(styles.decisionResult, isExpired && styles.expiredResult)}>
             <View className={styles.resultHeader}>
-              <View className={`${styles.resultIcon} ${styles[approval.status]}`}>
-                <Text>{statusIconMap[approval.status] || '✓'}</Text>
+              <View className={classnames(styles.resultIcon, styles[isExpired ? 'expired' : approval.status])}>
+                <Text>{statusIconMap[isExpired ? 'expired' : approval.status] || '✓'}</Text>
               </View>
               <View className={styles.resultInfo}>
-                <Text className={styles.resultStatus}>
-                  {statusTextMap[approval.status] || approval.status}
+                <Text className={classnames(styles.resultStatus, isExpired && styles.expiredText)}>
+                  {statusTextMap[isExpired ? 'expired' : approval.status] || approval.status}
                 </Text>
                 <Text className={styles.resultTime}>
                   审批时间：{approval.decisionTime}
                 </Text>
               </View>
             </View>
+
+            {approval.deadline && (
+              <View className={styles.deadlineInfo}>
+                <Text className={styles.deadlineLabel}>
+                  {isExpired ? '过期时间' : '限时截止'}
+                </Text>
+                <Text className={classnames(styles.deadlineValue, isExpired && styles.expiredText)}>
+                  {approval.deadline}
+                  {!isExpired && dateUtils.getDaysRemaining(approval.deadline) >= 0 && (
+                    <Text className={styles.daysRemaining}>
+                      （还剩{dateUtils.getDaysRemaining(approval.deadline)}天）
+                    </Text>
+                  )}
+                </Text>
+              </View>
+            )}
+
             {approval.decisionReason && (
               <View className={styles.resultReason}>
                 <Text className={styles.reasonLabel}>审批理由</Text>
                 <Text className={styles.reasonText}>{approval.decisionReason}</Text>
+              </View>
+            )}
+
+            {approval.notificationStatus === 'notified' && (
+              <View className={styles.notificationInfo}>
+                <Text className={styles.notificationIcon}>✓</Text>
+                <Text className={styles.notificationText}>已通知申请人</Text>
+              </View>
+            )}
+
+            {relatedNotification && (
+              <View className={styles.notificationDetail}>
+                <Text className={styles.notificationDetailTitle}>通知详情</Text>
+                <View className={styles.notificationDetailItem}>
+                  <Text className={styles.notificationDetailLabel}>通知时间</Text>
+                  <Text className={styles.notificationDetailValue}>{relatedNotification.createTime}</Text>
+                </View>
+                <View className={styles.notificationDetailItem}>
+                  <Text className={styles.notificationDetailLabel}>通知对象</Text>
+                  <Text className={styles.notificationDetailValue}>{approval.applicant.name}</Text>
+                </View>
               </View>
             )}
           </View>
